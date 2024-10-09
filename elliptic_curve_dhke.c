@@ -3,7 +3,7 @@
 #include <gmp.h>
 #include <openssl/rand.h>
 
-void alice_key_exchange(mpz_t a, mpz_t b, mpz_t p, ec_point G);
+void alice_key_exchange(mpz_t a, mpz_t b, mpz_t p, ec_point *G);
 void generate_secure_random(mpz_t result, mpz_t max_value);
 
 int main(void) {
@@ -27,7 +27,7 @@ int main(void) {
     printf("z = ");
     scanf("%d", &G.z);
 
-    alice_key_exchange(a, b, p, G);
+    alice_key_exchange(a, b, p, &G);
 
     mpz_clears(a, b, p, G.x, G.y, NULL);
 
@@ -48,7 +48,7 @@ void generate_secure_random(mpz_t result, mpz_t max_value) {
     mpz_mod(result, result, max_value);
 }
 
-void alice_key_exchange(mpz_t a, mpz_t b, mpz_t p, ec_point G) {
+void alice_key_exchange(mpz_t a, mpz_t b, mpz_t p, ec_point *G) {
     mpz_t k_A;
     ec_point A, B, shared_key;
 
@@ -68,7 +68,7 @@ void alice_key_exchange(mpz_t a, mpz_t b, mpz_t p, ec_point G) {
     printf("z = ");
     scanf("%d", &B.z);
 
-    shared_key = point_multiplication(a, b, p, B, k_A);
+    shared_key = point_multiplication(a, b, p, &B, k_A);
     gmp_printf("Alice's shared key K = k_A * B is: K(%Zd:%Zd:%d)\n", shared_key.x, shared_key.y, shared_key.z);
 
     mpz_clears(k_A, A.x, A.y, B.x, B.y, shared_key.x, shared_key.y, NULL);

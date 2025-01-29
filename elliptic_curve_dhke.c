@@ -55,9 +55,14 @@ void alice_key_exchange(mpz_t a, mpz_t b, mpz_t p, ec_point *G) {
     mpz_inits(k_A, A.x, A.y, B.x, B.y, shared_key.x, shared_key.y, NULL);
 
     generate_secure_random(k_A, p);
-    gmp_printf("Número aleatorio: %Zd\n", k_A);
+    gmp_printf("Random number: %Zd\n", k_A);
 
     A = point_multiplication(a, b, p, G, k_A);
+    if (A.z == -1) {
+        perror("G is not a point in the curve");
+        mpz_clears(k_A, A.x, A.y, B.x, B.y, shared_key.x, shared_key.y, NULL);
+        return;
+    }
     gmp_printf("Alice's public key A = k_A * G is: A(%Zd, %Zd, %d)\n", A.x, A.y, A.z);
 
     printf("Enter the public key B from Bob (coordinates x, y, z):\n");
@@ -69,6 +74,11 @@ void alice_key_exchange(mpz_t a, mpz_t b, mpz_t p, ec_point *G) {
     scanf("%d", &B.z);
 
     shared_key = point_multiplication(a, b, p, &B, k_A);
+    if (B.z == -1) {
+        perror("Something went wrong. B is not a point in the curve");
+        mpz_clears(k_A, A.x, A.y, B.x, B.y, shared_key.x, shared_key.y, NULL);
+        return;
+    }
     gmp_printf("Alice's shared key K = k_A * B is: K(%Zd:%Zd:%d)\n", shared_key.x, shared_key.y, shared_key.z);
 
     mpz_clears(k_A, A.x, A.y, B.x, B.y, shared_key.x, shared_key.y, NULL);
